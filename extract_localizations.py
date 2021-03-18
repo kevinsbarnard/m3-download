@@ -16,7 +16,10 @@ def observation_localizations(observation_data):
                 'concept': observation_data['concept'],
                 'localization': json.loads(assoc['link_value']),
                 'images': {
-                    e['format']: e['url']
+                    e['format']: {
+                        'url': e['url'],
+                        'image_reference_uuid': e['uuid']
+                    }
                     for e in observation_data['image_references']
                 }
             }
@@ -34,10 +37,17 @@ def main(digest_paths):
     for digest_path in digest_paths:
         with open(digest_path) as f:
             observations = json.load(f)
-            all_localizations.extend(extract_localizations(observations))
+            localizations = extract_localizations(observations)
+            print('{:<50}: {:>10} localizations'.format(digest_path, len(localizations)))
+            all_localizations.extend(localizations)
 
-    with open('localizations.json', 'w') as f:
+    print('Extracted {} total localizations'.format(len(all_localizations)))
+
+    out_path = 'localizations.json'
+    with open(out_path, 'w') as f:
         json.dump(all_localizations, f, indent=2)
+
+    print('Wrote to {}'.format(out_path))
 
 
 if __name__ == '__main__':
