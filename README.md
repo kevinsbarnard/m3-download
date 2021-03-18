@@ -3,6 +3,15 @@ Quick scripts for downloading localizations and images via M3
 
 _Author: Kevin Barnard_
 
+## Dependencies
+PIP packages:
+- `requests`
+
+To install all dependencies:
+```bash
+pip install requests
+```
+
 ## Usage
 
 ### 1. Generate observation digests
