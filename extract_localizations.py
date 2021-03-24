@@ -1,7 +1,7 @@
 # extract_localizations.py (m3-download)
-__description__ = '''
+"""
 Extract localizations from a digest (see generate_digest.py) and format them nicely
-'''
+"""
 
 import argparse
 import json
@@ -51,7 +51,7 @@ def main(digest_paths):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__description__)
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('digest', nargs='+', type=str, help='Path to the digest JSON')
     args = parser.parse_args()
     main(args.digest)

@@ -1,7 +1,7 @@
 # download_images.py (m3-download)
-__description__ = '''
+"""
 Download images corresponding to localizations
-'''
+"""
 
 import argparse
 import json
@@ -84,7 +84,7 @@ def main(localizations_path, output_dir, n_workers, image_format, overwrite=Fals
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__description__)
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('localizations', type=str, help='Path to JSON list of localizations')
     parser.add_argument('output_dir', type=str, help='Output directory')
     parser.add_argument('-j', '--jobs', type=int, default=1, help='Number of multiprocessing jobs to use (default=1)')
