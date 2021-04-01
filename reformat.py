@@ -52,6 +52,10 @@ def main(localizations_path: str, output_name: str, format_type: str):
             annotation_record.add_annotation(localization)
 
         annotation_record.write(output_path)
+    elif format_type in FORMATS:
+        print('Unimplemented format: {}'.format(format_type))
+    else:
+        print('Invalid format: {}'.format(format_type))
 
 
 if __name__ == '__main__':
