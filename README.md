@@ -33,6 +33,11 @@ optional arguments:
 
 This will write a file `[concept]_digest.json` with the corresponding observations with valid images.
 
+#### Example:
+```
+$ python generate_digest.py -d 'Sebastes'
+```
+
 ### 2. Extracting localizations
 The next step is to extract and reformat the localizations using `extract_localizations.py`:
 ```
@@ -48,6 +53,11 @@ optional arguments:
 ```
 
 __Any number of observation digest JSONs can be supplied.__ This will create `localizations.json`, a reformatted JSON list of all localizations and some associated metadata.
+
+#### Example:
+```
+$ python extract_localizations.py /Users/lonny/Desktop/m3-download-main/Sebastes_desc_digest.json
+```
 
 ### 3. Download images
 Now, we can download the images corresponding to the localizations in our JSON list using `download_images.py`:
@@ -74,6 +84,11 @@ The default image format is `image/png` for the uncompressed original images, bu
   
 Image overwrite is false by default to allow for any program/network failures. Specify the `-o` flag to overwrite images if desired.
 
+#### Example:
+```
+$ python download_images.py /Users/lonny/Desktop/m3-download-main/localizations.json  ~/Desktop/Sebastes/
+```
+
 ### 4. Reformat localizations
 Localization reformatting is done through `reformat.py`:
 ```
@@ -90,4 +105,9 @@ optional arguments:
                         Output file name, omitting the extension (dependent on format)
   -f FORMAT, --format FORMAT
                         Localization format to write. Options: CSV, COCO, VOC, TF
+```
+
+#### Example:
+```
+$ python reformat.py -o ~/Desktop/reformat -f COCO /Users/lonny/Desktop/m3-download-main/localizations.json
 ```
