@@ -1,6 +1,10 @@
 # localization.py (m3-download)
 import json
+import os
+from typing import List, Optional, Tuple
 from uuid import UUID
+import xml.etree.ElementTree as ETree
+from xml.dom import minidom
 
 
 class Localization:
@@ -18,7 +22,7 @@ class Localization:
 
     @property
     def box(self):
-        return [self.x, self.y, self.width, self.height]
+        return self.x, self.y, self.width, self.height
 
     @property
     def xmax(self):
@@ -30,11 +34,15 @@ class Localization:
 
     @property
     def points_min(self):
-        return [self.x, self.y]
+        return self.x, self.y
 
     @property
     def points_max(self):
-        return [self.xmax, self.ymax]
+        return self.xmax, self.ymax
+
+    @property
+    def points(self):
+        return self.points_min + self.points_max
 
 
 class COCO:
@@ -169,3 +177,125 @@ class COCO:
     def write(self, path):
         with open(path, 'w') as f:
             json.dump(self.json, f, indent=2)
+
+
+class PascalVOC:
+    """ Pascal Visual Object Classes (VOC) """
+
+    class Annotation:
+        def __init__(self, folder: str, filename: str, size: tuple,
+                     localizations: Optional[List[Tuple[str, Localization]]] = None):
+            self._folder = folder
+            self._filename = filename
+
+            self._width = 0
+            self._height = 0
+            self._depth = 1
+
+            self.size = size
+
+            self._localizations: List[Tuple[str, Localization]] = []
+            if localizations:
+                for name, loc in localizations:
+                    self.add(name, loc)
+
+        def add(self, name: str, localization: Localization):
+            self._localizations.append((name, localization))
+
+        def clear(self):
+            self._localizations.clear()
+
+        def __getitem__(self, item):
+            return self._localizations[item]
+
+        @property
+        def filename(self):
+            return self._filename
+
+        @property
+        def size(self):
+            return self._height, self._width, self._depth
+
+        @size.setter
+        def size(self, value: tuple):
+            if len(value) < 2 or len(value) > 3:
+                raise ValueError(f'Bad number of dimensions in size tuple {value}.')
+
+            self._height, self._width, *ext = value  # Unpack
+
+            if ext:  # Handle depth
+                self._depth = ext[0]
+
+        @property
+        def xml(self) -> str:
+            annotation = ETree.Element('annotation')  # Root
+
+            # Meta
+            folder = ETree.SubElement(annotation, 'folder')
+            folder.text = self._folder
+            filename = ETree.SubElement(annotation, 'filename')
+            filename.text = self._filename
+
+            # Size
+            size = ETree.SubElement(annotation, 'size')
+            width = ETree.SubElement(size, 'width')
+            width.text = str(self._width)
+            height = ETree.SubElement(size, 'height')
+            height.text = str(self._height)
+            depth = ETree.SubElement(size, 'depth')
+            depth.text = str(self._depth)
+
+            # Localizations
+            for name, loc in self._localizations:
+                loc_object = ETree.SubElement(annotation, 'object')
+
+                loc_name = ETree.SubElement(loc_object, 'name')
+                loc_name.text = name
+
+                bndbox = ETree.SubElement(loc_object, 'bnxbox')
+                xmin = ETree.SubElement(bndbox, 'xmin')
+                ymin = ETree.SubElement(bndbox, 'ymin')
+                xmax = ETree.SubElement(bndbox, 'xmax')
+                ymax = ETree.SubElement(bndbox, 'ymax')
+
+                xmin.text, ymin.text, xmax.text, ymax.text = tuple(map(str, loc.points))
+
+            return ETree.tostring(annotation, encoding='unicode')
+
+    def __init__(self):
+        self.annotations: List[PascalVOC.Annotation] = []
+
+    def add_annotation(self, image_reference_uuid: str, anns: List[dict]):
+        if not anns:
+            return
+
+        for image_format, image_record in anns[0]['images'].items():
+            if image_record['image_reference_uuid'].lower() == image_reference_uuid.lower():
+                url = image_record['url']
+                break
+        else:
+            raise ValueError(f'No image found for image reference UUID {image_reference_uuid}')
+
+        names = []
+        localizations = []
+        for ann in anns:
+            loc = ann['localization']
+            names.append(ann['concept'])
+            localizations.append(Localization(loc['x'], loc['y'], loc['width'], loc['height']))
+
+        size = (0, 0, 3)
+        annotation = PascalVOC.Annotation(
+            os.path.dirname(url),
+            os.path.basename(url),
+            size,
+            list(zip(names, localizations))
+        )
+
+        self.annotations.append(annotation)
+
+    def write(self, dirpath, form):
+        os.makedirs(dirpath, exist_ok=True)  # Make directory if doesn't exist
+
+        for annotation in self.annotations:
+            with open(os.path.join(dirpath, form.format(annotation.filename)), 'w') as f:
+                f.write(minidom.parseString(annotation.xml).toprettyxml())
