@@ -28,7 +28,7 @@ def download_helper(url_path_tup):
 
 def download_images(urls, paths, n_workers):
     # Zip the urls and paths for mapping
-    url_path_tups = zip(urls, paths)
+    url_path_tups = list(zip(urls, paths))
 
     multi = n_workers > 1
     if multi:  # Use multiprocessing
