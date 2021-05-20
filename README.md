@@ -29,6 +29,7 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         Config path
   -d, --descendants     Flag to include descendants in digest
+  -a, --all             Flag to include all other observations for each imaged moment in digest
 ```
 
 This will write a file `[concept]_digest.json` with the corresponding observations with valid images.
