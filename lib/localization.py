@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple
 from uuid import UUID
 import xml.etree.ElementTree as ETree
 from xml.dom import minidom
+from PIL import Image
 
 
 class Localization:
@@ -252,7 +253,7 @@ class PascalVOC:
                 loc_name = ETree.SubElement(loc_object, 'name')
                 loc_name.text = name
 
-                bndbox = ETree.SubElement(loc_object, 'bnxbox')
+                bndbox = ETree.SubElement(loc_object, 'bndbox')
                 xmin = ETree.SubElement(bndbox, 'xmin')
                 ymin = ETree.SubElement(bndbox, 'ymin')
                 xmax = ETree.SubElement(bndbox, 'xmax')
@@ -265,7 +266,7 @@ class PascalVOC:
     def __init__(self):
         self.annotations: List[PascalVOC.Annotation] = []
 
-    def add_annotation(self, image_reference_uuid: str, anns: List[dict]):
+    def add_annotation(self, image_reference_uuid: str, anns: List[dict], image_folder: str):
         if not anns:
             return
 
@@ -283,11 +284,20 @@ class PascalVOC:
             names.append(ann['concept'])
             localizations.append(Localization(loc['x'], loc['y'], loc['width'], loc['height']))
 
-        size = (0, 0, 3)
+        file_base = os.path.basename(url)
+        file_full = os.path.join(image_folder, file_base)
+        if not os.path.exists(file_full):
+            print('[WARNING] No image found at {}, skipping'.format(file_full))
+            return
+
+        with Image.open(file_full) as im:
+            width, height = im.size
+            depth = len(im.getbands())
+
         annotation = PascalVOC.Annotation(
-            os.path.dirname(url),
-            os.path.basename(url),
-            size,
+            image_folder,
+            file_base,
+            (height, width, depth),
             list(zip(names, localizations))
         )
 
@@ -297,5 +307,5 @@ class PascalVOC:
         os.makedirs(dirpath, exist_ok=True)  # Make directory if doesn't exist
 
         for annotation in self.annotations:
-            with open(os.path.join(dirpath, form.format(annotation.filename)), 'w') as f:
-                f.write(minidom.parseString(annotation.xml).toprettyxml())
+            with open(os.path.join(dirpath, form.format(os.path.splitext(annotation.filename)[0])), 'w') as f:
+                f.write('\n'.join(minidom.parseString(annotation.xml).toprettyxml(indent=' '*4).splitlines()[1:]))

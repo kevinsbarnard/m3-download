@@ -6,10 +6,11 @@ _Author: Kevin Barnard_
 ## Dependencies
 PIP packages:
 - `requests`
+- `pillow`
 
 To install all dependencies:
 ```bash
-pip install requests
+pip install requests pillow
 ```
 
 ## Usage
@@ -106,9 +107,14 @@ optional arguments:
                         Output file name, omitting the extension (dependent on format)
   -f FORMAT, --format FORMAT
                         Localization format to write. Options: CSV, COCO, VOC, TF
+  --voc_images VOC_IMAGES
+                        Image folder for VOC formatting.
 ```
 
 #### Example:
 ```
 $ python reformat.py -o ~/Desktop/reformat -f COCO /Users/lonny/Desktop/m3-download-main/localizations.json
 ```
+
+_Note for VOC formatting:_ The `--voc_images` argument must be specified. 
+This should be the path to a flat directory containing the images (see `download_images.py`) corresponding to the localizations in the specified `localizations` JSON file. 

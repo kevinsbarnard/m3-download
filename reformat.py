@@ -23,7 +23,7 @@ def formats_str() -> str:
     return ', '.join([f.upper() for f in FORMATS])
 
 
-def main(localizations_path: str, output_name: str, format_type: str):
+def main(localizations_path: str, output_name: str, format_type: str, voc_images: str):
     with open(localizations_path) as f:
         localizations = json.load(f)
 
@@ -54,6 +54,10 @@ def main(localizations_path: str, output_name: str, format_type: str):
         annotation_record.write(output_path)
 
     elif format_type == 'VOC':
+        if not voc_images:
+            print('[ERROR] Folder name argument must be specified for VOC formatting (--voc-folder)')
+            exit(1)
+
         iruuid_locs = {}
         for loc in localizations:
             iruuid = loc['localization']['image_reference_uuid']
@@ -64,7 +68,7 @@ def main(localizations_path: str, output_name: str, format_type: str):
 
         annotation_record = PascalVOC()
         for iruuid, locs in iruuid_locs.items():
-            annotation_record.add_annotation(iruuid, locs)
+            annotation_record.add_annotation(iruuid, locs, voc_images)
 
         annotation_record.write(output_name, '{}.' + FORMATS[format_type])
 
@@ -87,10 +91,13 @@ if __name__ == '__main__':
                          type=str,
                          default='COCO',
                          help='Localization format to write. Options: ' + formats_str())
+    _parser.add_argument('--voc_images',
+                         type=str,
+                         help='Image folder for VOC formatting.')
     _args = _parser.parse_args()
 
     _output = _args.output
     if not _output:
         _output = os.path.splitext(_args.localizations)[0] + '_reformatted'
 
-    main(_args.localizations, _output, _args.format.upper())
+    main(_args.localizations, _output, _args.format.upper(), _args.voc_images)
