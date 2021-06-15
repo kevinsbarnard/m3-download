@@ -23,7 +23,7 @@ def formats_str() -> str:
     return ', '.join([f.upper() for f in FORMATS])
 
 
-def main(localizations_path: str, output_name: str, format_type: str, voc_images: str):
+def main(localizations_path: str, output_name: str, format_type: str, image_map_filename: str):
     with open(localizations_path) as f:
         localizations = json.load(f)
 
@@ -32,10 +32,10 @@ def main(localizations_path: str, output_name: str, format_type: str, voc_images
         all_images = []
         all_categories = set()
         for localization in localizations:
-            for image in localization['images'].values():
+            for image_reference_uuid, url in localization['image_urls'].items():
                 record = {
-                    'id': UUID(image['image_reference_uuid']).int,
-                    'file_name': os.path.basename(image['url'])
+                    'id': UUID(image_reference_uuid).int,
+                    'file_name': os.path.basename(url)
                 }
                 if record not in all_images:
                     all_images.append(record)
@@ -52,11 +52,16 @@ def main(localizations_path: str, output_name: str, format_type: str, voc_images
             annotation_record.add_annotation(localization)
 
         annotation_record.write(output_path)
+        print('Wrote COCO annotation record to {}'.format(output_path))
 
     elif format_type == 'VOC':
-        if not voc_images:
-            print('[ERROR] Folder name argument must be specified for VOC formatting (--voc-folder)')
+        if not image_map_filename:
+            print('[ERROR] Image map argument must be specified for VOC formatting (--image_map)')
             exit(1)
+
+        # Load the image map
+        with open(image_map_filename) as f:
+            image_map = json.load(f)
 
         iruuid_locs = {}
         for loc in localizations:
@@ -68,9 +73,10 @@ def main(localizations_path: str, output_name: str, format_type: str, voc_images
 
         annotation_record = PascalVOC()
         for iruuid, locs in iruuid_locs.items():
-            annotation_record.add_annotation(iruuid, locs, voc_images)
+            annotation_record.add_annotation(iruuid, locs, image_map)
 
         annotation_record.write(output_name, '{}.' + FORMATS[format_type])
+        print('Wrote {} VOC XML files to {}'.format(len(annotation_record.annotations), output_name))
 
     elif format_type in FORMATS:
         print('Unimplemented format: {}'.format(format_type))
@@ -91,13 +97,13 @@ if __name__ == '__main__':
                          type=str,
                          default='COCO',
                          help='Localization format to write. Options: ' + formats_str())
-    _parser.add_argument('--voc_images',
+    _parser.add_argument('--image_map',
                          type=str,
-                         help='Image folder for VOC formatting.')
+                         help='Image filename map for VOC formatting (see download_images.py)')
     _args = _parser.parse_args()
 
     _output = _args.output
     if not _output:
         _output = os.path.splitext(_args.localizations)[0] + '_reformatted'
 
-    main(_args.localizations, _output, _args.format.upper(), _args.voc_images)
+    main(_args.localizations, _output, _args.format.upper(), _args.image_map)

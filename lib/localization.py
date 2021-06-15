@@ -266,14 +266,12 @@ class PascalVOC:
     def __init__(self):
         self.annotations: List[PascalVOC.Annotation] = []
 
-    def add_annotation(self, image_reference_uuid: str, anns: List[dict], image_folder: str):
+    def add_annotation(self, image_reference_uuid: str, anns: List[dict], image_map: dict):
         if not anns:
             return
 
-        for image_format, image_record in anns[0]['images'].items():
-            if image_record['image_reference_uuid'].lower() == image_reference_uuid.lower():
-                url = image_record['url']
-                break
+        if image_reference_uuid in image_map:
+            filename = image_map[image_reference_uuid]
         else:
             raise ValueError(f'No image found for image reference UUID {image_reference_uuid}')
 
@@ -284,19 +282,17 @@ class PascalVOC:
             names.append(ann['concept'])
             localizations.append(Localization(loc['x'], loc['y'], loc['width'], loc['height']))
 
-        file_base = os.path.basename(url)
-        file_full = os.path.join(image_folder, file_base)
-        if not os.path.exists(file_full):
-            print('[WARNING] No image found at {}, skipping'.format(file_full))
+        if not os.path.exists(filename):
+            print('[WARNING] No image found at {}, skipping'.format(filename))
             return
 
-        with Image.open(file_full) as im:
+        with Image.open(filename) as im:
             width, height = im.size
             depth = len(im.getbands())
 
         annotation = PascalVOC.Annotation(
-            image_folder,
-            file_base,
+            os.path.dirname(filename),
+            os.path.basename(filename),
             (height, width, depth),
             list(zip(names, localizations))
         )

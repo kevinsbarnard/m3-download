@@ -15,13 +15,7 @@ def observation_localizations(observation_data):
                 'association_uuid': assoc['uuid'],
                 'concept': observation_data['concept'],
                 'localization': json.loads(assoc['link_value']),
-                'images': {
-                    e['format']: {
-                        'url': e['url'],
-                        'image_reference_uuid': e['uuid']
-                    }
-                    for e in observation_data['image_references']
-                }
+                'image_urls': {e['uuid']: e['url'] for e in observation_data['image_references']}
             }
 
 

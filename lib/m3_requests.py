@@ -36,3 +36,10 @@ def get_imaged_moment_data(config: Config, imaged_moment_uuid: str):
         return requests.get(config('m3', 'imagedmoment') + '/' + imaged_moment_uuid.lower()).json()
     except JSONDecodeError:
         print('[ERROR] Failed to get imaged moment data for UUID: {}'.format(imaged_moment_uuid.lower()))
+
+
+def get_image_reference_data(config: Config, image_reference_uuid: str):
+    try:
+        return requests.get(config('m3', 'imagereference') + '/' + image_reference_uuid.lower()).json()
+    except JSONDecodeError:
+        print('[ERROR] Failed to get image reference data for UUID: {}'.format(image_reference_uuid.lower()))
