@@ -18,7 +18,7 @@ pip install requests pillow
 ### 1. Generate observation digests
 An observation digest is simply a JSON list of observations as supplied by M3. To get this for a specific concept, use `generate_digest.py`:
 ```
-usage: generate_digest.py [-h] [-c CONFIG] [-d] concept
+usage: generate_digest.py [-h] [-c CONFIG] [-d] [-a] concept
 
 Look up observations (with a valid image) for a given concept and generate a digest
 

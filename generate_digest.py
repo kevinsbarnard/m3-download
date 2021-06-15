@@ -28,10 +28,11 @@ def main(concept, config_path, include_descendants, include_all):
         print('Getting observations for {} + descendants...'.format(concept))
         concepts = list(get_concept_descendants(config, concept))
         concepts.insert(0, concept)
+        print('Included concepts: {}'.format(', '.join(concepts)))
         json_data = []
         for c in concepts:
             json_part = get_fast_concept_images(config, c)
-            if not json_part:  # Fatal
+            if json_part is None:  # Fatal
                 exit(1)
             json_data.extend(json_part)
         print('Found {} observations of {} + descendants with valid images'.format(len(json_data), concept))
