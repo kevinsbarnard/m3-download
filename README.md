@@ -14,6 +14,8 @@ To install all dependencies:
 pip install requests pillow
 ```
 
+---
+
 ## Usage
 
 ### 1. Generate observation digests
@@ -92,7 +94,7 @@ In case any images fail to download, their URLs will be written to `failures.csv
 
 #### Example:
 ```bash
-python download_images.py /Users/lonny/Desktop/m3-download-main/localizations.json ~/Desktop/Sebastes/
+python download_images.py /Users/lonny/Desktop/m3-download-main/localizations.json /Users/lonny/Desktop/Sebastes/
 ```
 
 ### 4. Reformat localizations
@@ -129,10 +131,10 @@ This file should be a mapping from image reference UUID to the downloaded image 
 
 ---
 
-## Utilities
+## Utility scripts (in `scripts/`)
 
 ### `voc_to_yolo.py`: convert Pascal VOC to YOLO
-`voc_to_yolo.py` accepts any number of input directories containing Pascal-VOC annotation XMLs, converts them to YOLO annotations, and writes them to a specified output directory.
+`voc_to_yolo.py` accepts any number of input directories containing Pascal VOC annotation XMLs, converts them to YOLO annotations, and writes them to a specified output directory.
 ```
 usage: voc_to_yolo.py [-h] [-o OUTPUT_DIR] input_dir [input_dir ...]
 
@@ -151,5 +153,75 @@ The class label names file `yolo.names` will be written to the working directory
 
 #### Example:
 ```bash
-python voc_to_yolo.py -o Sebastes_yolo Sebastes_voc_1 Sebastes_voc_2
+python voc_to_yolo.py -o Sebastes_yolo/ Sebastes_voc_1/ Sebastes_voc_2/
+```
+
+### `count_localizations.py`: count localizations in Pascal VOC annotations
+`count_localizations.py` counts the number of localizations per concept in a directory of Pascal VOC annotation XMLs.
+```
+usage: count_localizations.py [-h] [-c] [-t] directory
+
+positional arguments:
+  directory    Localization directory
+
+optional arguments:
+  -h, --help   show this help message and exit
+  -c, --csv    CSV-formatted output
+  -t, --total  Append total of all counts in output
+```
+
+### `remap_voc.py`: remap concepts in Pascal VOC annotations
+`remap_voc.py` performs a bulk remapping on a directory of Pascal VOC annotation XMLs as specified by a remapping file. The remapping file may be a CSV (`.csv`) or JSON (`.json`) as specified:
+
+- __CSV__ remapping files consist of one remapping per line. The current concept should be in the first column, and the new concept should be in the second column. Example:
+```text
+LRJ complex,Benthocodon
+Benthocodon pedunculata,Benthocodon
+Peniagone sp. A,Peniagone
+Peniagone sp. 2,Peniagone
+Peniagone sp. 1,Peniagone
+Peniagone vitrea,Peniagone
+Peniagone vitrea- sp. 1 complex,Peniagone
+Peniagone papillata,Peniagone
+Scotoplanes sp. A,Scotoplanes
+Scotoplanes clarki,Scotoplanes
+Scotoplanes globosa,Scotoplanes
+```
+- __JSON__ remapping files consist of the literal map as a JSON object. Example:
+```json
+{
+  "LRJ complex": "Benthocodon",
+  "Benthocodon pedunculata": "Benthocodon",
+  "Peniagone sp. A": "Peniagone",
+  "Peniagone sp. 2": "Peniagone",
+  "Peniagone sp. 1": "Peniagone",
+  "Peniagone vitrea": "Peniagone",
+  "Peniagone vitrea- sp. 1 complex": "Peniagone",
+  "Peniagone papillata": "Peniagone",
+  "Scotoplanes sp. A": "Scotoplanes",
+  "Scotoplanes clarki": "Scotoplanes",
+  "Scotoplanes globosa": "Scotoplanes"
+}
+```
+
+```
+usage: remap_voc.py [-h] [-o OUTPUT_DIR] map_file input_dir
+
+Remap concepts in a directory of Pascal VOC annotation XMLs
+
+positional arguments:
+  map_file              File (.csv or .json) containing remapping
+  input_dir             Input directory of VOC annotation XMLs
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        (optional) Output directory for remapped annotations (if unspecified, original annotation files will be overwritten)
+```
+
+_Note:_ If the `--output_dir` option is unspecified, __the original annotation files will be overwritten.__
+
+#### Example:
+```bash
+python remap_voc.py -o Benthocodon_remapped/ remapping.csv Benthocodon/
 ```

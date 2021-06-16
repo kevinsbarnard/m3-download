@@ -65,7 +65,7 @@ def convert_voc_to_yolo(voc_paths: List[str], output_dir: str):
 
     # Write class name map to yolo.names
     reverse_names = {idx: name for name, idx in names.items()}
-    with open('yolo.names', 'w') as f:
+    with open('../yolo.names', 'w') as f:
         f.writelines([reverse_names[idx] + '\n' for idx in range(len(reverse_names))])
 
     print('[INFO] Wrote yolo.names')
