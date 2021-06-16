@@ -37,7 +37,7 @@ optional arguments:
 This will write a file `[concept]_digest.json` with the corresponding observations with valid images.
 
 #### Example:
-```
+```bash
 python generate_digest.py -d 'Sebastes'
 ```
 
@@ -58,7 +58,7 @@ optional arguments:
 __Any number of observation digest JSONs can be supplied.__ This will create `localizations.json`, a reformatted JSON list of all localizations and some associated metadata.
 
 #### Example:
-```
+```bash
 python extract_localizations.py /Users/lonny/Desktop/m3-download-main/Sebastes_desc_digest.json
 ```
 
@@ -91,7 +91,7 @@ This is useful for back-referencing images in VARS and becomes necessary when pe
 In case any images fail to download, their URLs will be written to `failures.csv`.
 
 #### Example:
-```
+```bash
 python download_images.py /Users/lonny/Desktop/m3-download-main/localizations.json ~/Desktop/Sebastes/
 ```
 
@@ -116,7 +116,7 @@ optional arguments:
 ```
 
 #### Example:
-```
+```bash
 python reformat.py \
     -o ~/Desktop/reformat \
     -f VOC \
@@ -126,3 +126,30 @@ python reformat.py \
 
 _Note for VOC formatting:_ The `--image_map` argument must be specified (see `download_images.py`).
 This file should be a mapping from image reference UUID to the downloaded image path.
+
+---
+
+## Utilities
+
+### `voc_to_yolo.py`: convert Pascal VOC to YOLO
+`voc_to_yolo.py` accepts any number of input directories containing Pascal-VOC annotation XMLs, converts them to YOLO annotations, and writes them to a specified output directory.
+```
+usage: voc_to_yolo.py [-h] [-o OUTPUT_DIR] input_dir [input_dir ...]
+
+Convert Pascal VOC annotation XMLs to YOLO format
+
+positional arguments:
+  input_dir             Input directory of VOC annotation XMLs
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        Output directory for YOLO annotations
+```
+
+The class label names file `yolo.names` will be written to the working directory.
+
+#### Example:
+```bash
+python voc_to_yolo.py -o Sebastes_yolo Sebastes_voc_1 Sebastes_voc_2
+```
