@@ -78,7 +78,7 @@ def main(map_file: str, input_dir: str, output_dir: Optional[str] = None):
         print('[ERROR] Input directory {} does not exist'.format(input_dir))
         exit(1)
 
-    if not os.path.exists(output_dir):
+    if output_dir is not None and not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
         print('[INFO] Created output directory {}'.format(output_dir))
 
