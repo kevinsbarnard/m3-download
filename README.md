@@ -225,3 +225,28 @@ _Note:_ If the `--output_dir` option is unspecified, __the original annotation f
 ```bash
 python remap_voc.py -o Benthocodon_remapped/ remapping.csv Benthocodon/
 ```
+
+### `add_taxonomy.py`: add taxonomic information to Pascal VOC annotations
+`add_taxonomy.py` adds taxonomic information to each `<object>` for all Pascal VOC annotations in a directory. 
+This information is fetched from MBARI's [Deep-Sea Guide](http://dsg.mbari.org).
+
+```
+usage: add_taxonomy.py [-h] [-o OUTPUT_DIR] input_dir
+
+Add taxonomic information to Pascal VOC annotations
+
+positional arguments:
+  input_dir             Input directory of VOC annotation XMLs
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        (optional) Output directory for new annotations (if unspecified, original annotation files will be overwritten)
+```
+
+#### Example:
+```bash
+python add_taxonomy.py Benthocodon/
+```
+
+_Note:_ If the `--output_dir` option is unspecified, __the original annotation files will be overwritten.__
