@@ -61,9 +61,12 @@ def remap_voc(voc_paths: List[str], mapping: dict, output_dir: Optional[str] = N
                 output_path = os.path.join(output_dir, os.path.basename(voc_path))
 
             with open(output_path, 'w') as f:
-                f.write('\n'.join(minidom.parseString(
-                    ETree.tostring(root, encoding='unicode')
-                ).toprettyxml(indent=' '*4).splitlines()[1:]))
+                f.write('\n'.join([
+                    line for line in minidom.parseString(
+                        ETree.tostring(root, encoding='unicode')
+                    ).toprettyxml(indent=' ' * 4).splitlines()[1:]
+                    if line.strip()
+                ]))
 
     print('[INFO] Modified {} annotation XMLs'.format(n_modified))
 
