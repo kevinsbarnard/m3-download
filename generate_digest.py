@@ -79,7 +79,6 @@ def main(concept, config_path, include_descendants, include_all):
                         'observation_uuid': observation_uuid,
                         'concept': observation['concept'],
                         'observer': observation['observer'],
-                        'observation_timestamp': observation['observation_timestamp'],
                         'video_reference_uuid': imaged_moment['video_reference_uuid'],
                         'imaged_moment_uuid': imaged_moment_uuid,
                         'associations': observation['associations'],

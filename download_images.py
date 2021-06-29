@@ -97,7 +97,7 @@ def main(localizations_path, output_dir, n_workers, config_path, overwrite=False
 
     # Compute and write out a filename JSON map (for back-referencing)
     filename_map = {
-        iruuid: os.path.join(output_dir, os.path.basename(url_map[iruuid]))
+        iruuid: os.path.join(output_dir, os.path.basename(url_map[iruuid]).replace(':', '_'))  # Replace : with _ for Windows
         for iruuid in url_map
     }
     with open(IMAGE_MAP_FILENAME, 'w') as f:
@@ -105,8 +105,8 @@ def main(localizations_path, output_dir, n_workers, config_path, overwrite=False
     print('Image map written to {}'.format(IMAGE_MAP_FILENAME))
 
     # Extract URLs and file paths to parallel work lists
-    urls = list(url_map.values())
-    paths = [os.path.join(output_dir, os.path.basename(url)) for url in urls]
+    urls = [url_map[image_reference_uuid] for image_reference_uuid in url_map]
+    paths = [filename_map[image_reference_uuid] for image_reference_uuid in url_map]
 
     if not overwrite:  # Filter out already-downloaded images
         url_path_tups = zip(urls, paths)
