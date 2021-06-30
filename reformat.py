@@ -12,10 +12,8 @@ from uuid import UUID
 from lib.localization import COCO, PascalVOC
 
 FORMATS = {
-    'CSV': 'csv',
     'COCO': 'json',
-    'VOC': 'xml',
-    'TF': 'tfrecord'
+    'VOC': 'xml'
 }
 
 
@@ -65,6 +63,12 @@ def main(localizations_path: str, output_name: str, format_type: str, image_map_
 
         iruuid_locs = {}
         for loc in localizations:
+            if 'image_reference_uuid' not in loc['localization']:  # Malformed localization, cannot backreference
+                print('[WARNING] Localization with association UUID {} has malformed JSON, skipping'.format(
+                    loc['association_uuid']
+                ))
+                continue
+
             iruuid = loc['localization']['image_reference_uuid']
             if iruuid not in iruuid_locs:
                 iruuid_locs[iruuid] = []
