@@ -4,13 +4,14 @@ from json import JSONDecodeError
 import requests
 
 from lib.config import Config
+from lib.utils import warning
 
 
 def get_fast_concept_images(config: Config, concept: str):
     try:
         return requests.get(config('m3', 'fastconceptimages') + '/' + concept).json()
     except JSONDecodeError:
-        print('[ERROR] Failed to get observations for concept: {}'.format(concept))
+        warning('Failed to get observations for concept: {}'.format(concept))
 
 
 def get_concept_descendants(config: Config, concept: str) -> list:
@@ -31,15 +32,25 @@ def get_concept_descendants(config: Config, concept: str) -> list:
     return recursive_accumulate(res.json())
 
 
+def get_concept_taxa(config: Config, concept: str) -> list:
+    url = config('m3', 'kbtaxa')
+    res = requests.get(url + '/' + concept)
+
+    try:
+        return [el['name'] for el in res.json()]
+    except (JSONDecodeError, TypeError):
+        warning('Failed to get taxa for concept: {}'.format(concept))
+
+
 def get_imaged_moment_data(config: Config, imaged_moment_uuid: str):
     try:
         return requests.get(config('m3', 'imagedmoment') + '/' + imaged_moment_uuid.lower()).json()
     except JSONDecodeError:
-        print('[ERROR] Failed to get imaged moment data for UUID: {}'.format(imaged_moment_uuid.lower()))
+        warning('Failed to get imaged moment data for UUID: {}'.format(imaged_moment_uuid.lower()))
 
 
 def get_image_reference_data(config: Config, image_reference_uuid: str):
     try:
         return requests.get(config('m3', 'imagereference') + '/' + image_reference_uuid.lower()).json()
     except JSONDecodeError:
-        print('[ERROR] Failed to get image reference data for UUID: {}'.format(image_reference_uuid.lower()))
+        warning('Failed to get image reference data for UUID: {}'.format(image_reference_uuid.lower()))
