@@ -1,7 +1,7 @@
 # localization.py (m3-download)
 import json
 import os
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 from uuid import UUID
 import xml.etree.ElementTree as ETree
 from xml.dom import minidom
@@ -11,7 +11,7 @@ from PIL import Image
 class Localization:
     __slots__ = ['x', 'y', 'width', 'height']
 
-    def __init__(self, x: int, y: int, width: int, height: int):
+    def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
         self.width = width
